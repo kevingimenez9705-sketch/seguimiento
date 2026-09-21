@@ -426,7 +426,7 @@ function renderTable(rows) {
   const body = '<tbody>' + (data.length ? data.map(r => '<tr>' + COLS.map(c => {
     if (c.k === 'g') return '<td>' + esc(r.g) + '</td>';
     if (c.k === 'n') return '<td>' + r.n + '</td>';
-    if (c.k === 'nivel') return '<td class="' + (r.nivel == null ? '' : NIVEL_CLASS[r.nivel]) + '" title="' + (r.score == null ? '' : 'Puntaje: ' + r.score.toFixed(1) + ' / 4') + '">' + (r.nivel == null ? 'S/D' : NIVEL_LABEL[r.nivel] + ' (' + r.score.toFixed(1) + ')') + '</td>';
+    if (c.k === 'nivel') return '<td class="' + (r.nivel == null ? '' : NIVEL_CLASS[r.nivel]) + '">' + (r.nivel == null ? 'S/D' : NIVEL_LABEL[r.nivel] + ' (' + r.score.toFixed(1) + '/4)') + '</td>';
     const v = r[c.k];
     return '<td class="' + cls(v, c.inv) + '">' + (v == null ? 'S/D' : v + '%') + '</td>';
   }).join('') + '</tr>').join('') : '<tr><td colspan="' + COLS.length + '">S/D</td></tr>') + '</tbody>';
