@@ -372,14 +372,16 @@ function renderAlerts(alerts) {
   ).join('') : '';
 
   const list = alerts.slice().sort((a, b) => b.score - a.score || (b.date || 0) - (a.date || 0));
-  $('alerts').innerHTML = list.length ? list.map(d =>
-    '<article class="alert' + (d.score >= 3 ? ' high' : '') + '">' +
+  $('alerts').innerHTML = list.length ? list.map(d => {
+    const mejorar = (d.mejorar || '').split('|').map(s => s.trim()).filter(Boolean);
+    const mejorarTxt = mejorar.length ? mejorar.slice(0, 2).join(' · ') + (mejorar.length > 2 ? ' +' + (mejorar.length - 2) + ' más' : '') : null;
+    return '<article class="alert' + (d.score >= 3 ? ' high' : '') + '">' +
       '<div class="h"><span class="loc">' + esc(d.local || 'S/D') + '</span><span class="who">' + esc(d.fecha) + '</span></div>' +
       '<div class="who">' + esc([d.marca, d.zona, d.rol, d.antig].filter(Boolean).join(', ')) + '</div>' +
       '<div class="tags">' + d.reasons.map(r => '<span class="tag' + (r.r ? ' r' : '') + '">' + esc(r.t) + '</span>').join('') + '</div>' +
-      '<p class="q">Entrenamiento: ' + esc(d.entren || 'S/D') + '. Trato: ' + esc(d.trato || 'S/D') + '. Mejorar: ' + esc(d.mejorar || 'S/D') + '</p>' +
-    '</article>'
-  ).join('') : '<p class="empty">Ningún caso para revisar con estos filtros.</p>';
+      (mejorarTxt ? '<p class="q">Mejorar: ' + esc(mejorarTxt) + '</p>' : '') +
+    '</article>';
+  }).join('') : '<p class="empty">Ningún caso para revisar con estos filtros.</p>';
 }
 
 function renderDist(rows) {
