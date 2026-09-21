@@ -140,8 +140,8 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
   </div>
 
   <section class="panel">
-    <h2>Resultados por grupo</h2>
-    <p class="hint">Tocá un encabezado para ordenar.</p>
+    <h2>Entrenamiento por grupo</h2>
+    <p class="hint">Cómo fue el entrenamiento en cada grupo (la satisfacción general ya está arriba). Tocá un encabezado para ordenar.</p>
     <div class="seg" id="groupby" role="group" aria-label="Agrupar por">
       <button data-k="zona" aria-pressed="true">Zona</button>
       <button data-k="marca" aria-pressed="false">Marca</button>
@@ -209,6 +209,10 @@ function mapRows(rows) {
     o.expBad = /mala/i.test(o.exp);
     o.entrenOK = /^me explicaron tod/i.test(o.entren);
     o.entrenBad = /^casi no/i.test(o.entren);
+    o.entrenCat = /^me explicaron tod/i.test(o.entren) ? 'todo'
+      : /^me explicaron lo b/i.test(o.entren) ? 'basico'
+      : /^me explicaron poco/i.test(o.entren) ? 'poco'
+      : /^casi no/i.test(o.entren) ? 'casi' : null;
     o.tratoGood = /^(muy bueno|bueno)$/i.test(o.trato);
     o.incidente = /^s[ií]$/i.test(o.paso);
     o.pidioContacto = !!o.contacto && !/^(s\/d|no|-)$/i.test(o.contacto);
@@ -375,11 +379,10 @@ function renderMejorar(rows) {
 
 const COLS = [
   { k: 'g', l: 'Grupo' }, { k: 'n', l: 'Respuestas' },
-  { k: 'sat', l: 'Satisfacción', h: '% que calificó su experiencia como buena o muy buena' },
-  { k: 'ent', l: 'Explicaron todo', h: '% que eligió "me explicaron todo con paciencia". 0% no significa sin entrenamiento, sino que nadie eligió esa opción exacta (pueden haber tenido entrenamiento parcial)' },
-  { k: 'trato', l: 'Buen trato', h: '% que calificó el trato como bueno o muy bueno' },
-  { k: 'inc', l: 'Sucedió algo', inv: true, h: '% que respondió que sí pasó algo que no le gustó' },
-  { k: 'al', l: 'Alertas', h: 'Respuestas con al menos un motivo de alerta' }
+  { k: 'todo', l: 'Todo', h: '% que respondió "me explicaron todo con paciencia"' },
+  { k: 'basico', l: 'Básico', h: '% que respondió "me explicaron lo básico y me fui acomodando"' },
+  { k: 'poco', l: 'Poco', inv: true, h: '% que respondió "me explicaron poco, aprendí mirando"' },
+  { k: 'casi', l: 'Casi nada', inv: true, h: '% que respondió "casi no me explicaron nada"' }
 ];
 
 function renderTable(rows) {
@@ -387,7 +390,7 @@ function renderTable(rows) {
   rows.forEach(d => { const g = d[groupKey] || 'S/D'; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(d); });
   const data = [...groups.entries()].map(([g, arr]) => {
     const n = arr.length, c = f => arr.filter(f).length;
-    return { g, n, sat: pctNum(c(d => d.expGood), n), ent: pctNum(c(d => d.entrenOK), n), trato: pctNum(c(d => d.tratoGood), n), inc: pctNum(c(d => d.incidente), n), al: c(d => d.reasons.length) };
+    return { g, n, todo: pctNum(c(d => d.entrenCat === 'todo'), n), basico: pctNum(c(d => d.entrenCat === 'basico'), n), poco: pctNum(c(d => d.entrenCat === 'poco'), n), casi: pctNum(c(d => d.entrenCat === 'casi'), n) };
   });
   const { col, dir } = sortState;
   data.sort((a, b) => {
@@ -398,7 +401,7 @@ function renderTable(rows) {
   const head = '<thead><tr>' + COLS.map(c => '<th scope="col"' + (c.h ? ' title="' + esc(c.h) + '"' : '') + '><button data-col="' + c.k + '"' + (c.k === col ? ' aria-sort="' + (dir > 0 ? 'ascending' : 'descending') + '"' : '') + '>' + c.l + (c.k === col ? (dir > 0 ? ' ▲' : ' ▼') : '') + '</button></th>').join('') + '</tr></thead>';
   const body = '<tbody>' + (data.length ? data.map(r => '<tr>' + COLS.map(c => {
     if (c.k === 'g') return '<td>' + esc(r.g) + '</td>';
-    if (c.k === 'n' || c.k === 'al') return '<td' + (c.k === 'al' && r.al ? ' class="bad"' : '') + '>' + r[c.k] + '</td>';
+    if (c.k === 'n') return '<td>' + r.n + '</td>';
     const v = r[c.k];
     return '<td class="' + cls(v, c.inv) + '">' + (v == null ? 'S/D' : v + '%') + '</td>';
   }).join('') + '</tr>').join('') : '<tr><td colspan="' + COLS.length + '">S/D</td></tr>') + '</tbody>';
