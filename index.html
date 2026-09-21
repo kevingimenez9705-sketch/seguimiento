@@ -53,8 +53,6 @@ button,select{font:inherit;color:inherit}
 .kpi .v{font-size:1.7rem;font-weight:700;line-height:1.1}
 .kpi .l{color:var(--muted);font-size:.85rem}
 .kpi .n{color:var(--muted);font-size:.75rem}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px}
-@media (max-width:860px){.grid{grid-template-columns:1fr}}
 section.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
 h2{font-size:1.05rem;margin:0 0 4px;font-weight:600}
 .hint{color:var(--muted);font-size:.85rem;margin:0 0 14px}
@@ -129,18 +127,17 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
     <div class="kpis" id="kpis-alert"></div>
   </div>
 
-  <div class="grid">
-    <section class="panel">
-      <h2>Experiencia general</h2>
-      <div class="stack" id="dist"></div>
-      <div class="legend" id="dist-legend"></div>
-    </section>
-    <section class="panel">
-      <h2>Qué mejorar</h2>
-      <p class="hint" id="mejorar-hint"></p>
-      <div class="bars" id="mejorar"></div>
-    </section>
-  </div>
+  <section class="panel">
+    <h2>Experiencia general</h2>
+    <div class="stack" id="dist"></div>
+    <div class="legend" id="dist-legend"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Qué mejorar</h2>
+    <p class="hint" id="mejorar-hint"></p>
+    <div class="bars" id="mejorar"></div>
+  </section>
 
   <section class="panel">
     <h2>Entrenamiento por grupo</h2>
