@@ -156,7 +156,7 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
 
   <section class="panel">
     <h2>Entrenamiento y experiencia</h2>
-    <p class="hint">Cantidad de respuestas según cómo los entrenaron y cómo calificaron su experiencia.</p>
+    <p class="hint">Por cada tipo de entrenamiento, % de personas que calificó su experiencia en cada nivel (el color más intenso = mayor proporción dentro de esa fila).</p>
     <div class="scroll"><table class="matrix" id="matrix"></table></div>
   </section>
 </div>
@@ -419,15 +419,19 @@ function renderMatrix(rows) {
     .sort((a, b) => rows.filter(d => d.entren === b).length - rows.filter(d => d.entren === a).length);
   const extra = [...new Set(rows.map(d => d.exp).filter(v => v && !EXP_ORDER.includes(v)))];
   const exps = EXP_ORDER.concat(extra);
-  let max = 1;
-  const cell = ents.map(e => exps.map(x => { const c = rows.filter(d => (d.entren || 'S/D') === e && d.exp === x).length; if (c > max) max = c; return c; }));
+  const cell = ents.map(e => exps.map(x => rows.filter(d => (d.entren || 'S/D') === e && d.exp === x).length));
   const head = '<thead><tr><th scope="col">Entrenamiento</th>' + exps.map(x => '<th scope="col">' + esc(x) + '</th>').join('') + '</tr></thead>';
-  const body = '<tbody>' + (ents.length ? ents.map((e, i) => '<tr><td>' + esc(e) + '</td>' + exps.map((x, j) => {
-    const c = cell[i][j];
-    const base = j < 2 ? 'var(--green)' : j === 2 ? 'var(--amber)' : 'var(--red)';
-    const bg = c ? 'background:color-mix(in srgb,' + base + ' ' + Math.round(15 + c / max * 55) + '%,transparent)' : '';
-    return '<td style="' + bg + '">' + (c || '') + '</td>';
-  }).join('') + '</tr>').join('') : '<tr><td colspan="' + (exps.length + 1) + '">S/D</td></tr>') + '</tbody>';
+  const body = '<tbody>' + (ents.length ? ents.map((e, i) => {
+    const total = cell[i].reduce((s, c) => s + c, 0) || 1;
+    return '<tr><td>' + esc(e) + '</td>' + exps.map((x, j) => {
+      const c = cell[i][j];
+      const p = c / total;
+      const base = j < 2 ? 'var(--green)' : j === 2 ? 'var(--amber)' : 'var(--red)';
+      const bg = c ? 'background:color-mix(in srgb,' + base + ' ' + Math.round(15 + p * 70) + '%,transparent)' : '';
+      const label = c ? c + ' (' + Math.round(p * 100) + '%)' : '';
+      return '<td style="' + bg + '" title="' + Math.round(p * 100) + '% de este grupo">' + label + '</td>';
+    }).join('') + '</tr>';
+  }).join('') : '<tr><td colspan="' + (exps.length + 1) + '">S/D</td></tr>') + '</tbody>';
   $('matrix').innerHTML = head + body;
 }
 
