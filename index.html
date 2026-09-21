@@ -334,7 +334,7 @@ function render() {
 
   const kpiGood = [
     ['Satisfacción', pctNum(good, n), 'buena o muy buena'],
-    ['Explicaron todo', pctNum(count(d => d.entrenOK), n), 'con paciencia (resto: parcial)'],
+    ['Entrenamiento', pctNum(count(d => d.entrenOK), n), 'explicaron todo con paciencia (resto: parcial)'],
     ['Buen trato', pctNum(count(d => d.tratoGood), n), 'bueno o muy bueno']
   ].sort((a, b) => (b[1] ?? -1) - (a[1] ?? -1));
   const kpiAlert = [
