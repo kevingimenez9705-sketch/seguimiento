@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Experiencia de ingresantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F5F2;--surface:#FFFFFF;--ink:#16241D;--muted:#5B6B62;--line:#DCE3DE;
+  --green:#1D6B4C;--green-2:#6FAF8F;--green-soft:#DDEEE5;
+  --amber:#B8741A;--amber-soft:#F7EAD5;--red:#B42B24;--red-2:#DE8A82;--red-soft:#F6DEDB;
+  --radius:10px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1713;--surface:#16211B;--ink:#E6EEE9;--muted:#97A89E;--line:#26352D;
+  --green:#4FB58A;--green-2:#2F7A5A;--green-soft:#1B3A2C;
+  --amber:#E0A24A;--amber-soft:#3A2C17;--red:#EF7B72;--red-2:#8E3B35;--red-soft:#3F1F1C;
+}}
+:root[data-theme="dark"]{
+  --bg:#0F1713;--surface:#16211B;--ink:#E6EEE9;--muted:#97A89E;--line:#26352D;
+  --green:#4FB58A;--green-2:#2F7A5A;--green-soft:#1B3A2C;
+  --amber:#E0A24A;--amber-soft:#3A2C17;--red:#EF7B72;--red-2:#8E3B35;--red-soft:#3F1F1C;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 20px 48px}
+header.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+h1{font-size:1.6rem;line-height:1.2;margin:0;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:2px 0 0}
+.meta{display:flex;gap:12px;align-items:center;color:var(--muted);font-size:.875rem}
+button,select{font:inherit;color:inherit}
+.btn{background:var(--green);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:wait}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.banner{background:var(--amber-soft);color:var(--ink);border-left:4px solid var(--amber);padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:.9rem}
+.banner.err{background:var(--red-soft);border-color:var(--red)}
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+.filters label{display:flex;flex-direction:column;font-size:.8rem;color:var(--muted);gap:4px;min-width:140px;flex:1 1 140px;max-width:220px}
+.filters select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.hero{font-size:clamp(1.3rem,2.6vw,2rem);line-height:1.3;font-weight:500;max-width:34ch;margin:0 0 24px;letter-spacing:-.01em}
+.hero b{font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:28px}
+.kpi{background:var(--surface);padding:14px 16px}
+.kpi .v{font-size:1.7rem;font-weight:700;line-height:1.1}
+.kpi .l{color:var(--muted);font-size:.85rem}
+.kpi .n{color:var(--muted);font-size:.75rem}
+.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:24px;margin-bottom:28px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+section.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+h2{font-size:1.05rem;margin:0 0 4px;font-weight:600}
+.hint{color:var(--muted);font-size:.85rem;margin:0 0 14px}
+.alerts{display:flex;flex-direction:column;gap:10px;max-height:620px;overflow:auto;padding-right:4px}
+.alert{border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:8px;padding:10px 12px}
+.alert.high{border-left-color:var(--red)}
+.alert .h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.alert .loc{font-weight:600}
+.alert .who{color:var(--muted);font-size:.82rem}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
+.tag{font-size:.75rem;padding:2px 8px;border-radius:99px;background:var(--amber-soft)}
+.tag.r{background:var(--red-soft)}
+.alert .q{font-size:.85rem;color:var(--muted);margin:0}
+.empty{color:var(--muted);padding:12px 0}
+.stack{display:flex;height:22px;border-radius:6px;overflow:hidden;margin:6px 0 10px;background:var(--line)}
+.stack span{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.82rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.bars{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+.bar .t{display:flex;justify-content:space-between;gap:8px;font-size:.88rem}
+.bar .track{height:8px;background:var(--line);border-radius:4px;margin-top:3px}
+.bar .fill{height:100%;background:var(--green);border-radius:4px}
+.stackcol{display:flex;flex-direction:column;gap:24px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:500}
+th button{background:none;border:0;padding:0;cursor:pointer;color:inherit;font-weight:inherit}
+th button[aria-sort]{color:var(--ink);font-weight:600}
+.good{color:var(--green);font-weight:600}.mid{color:var(--amber);font-weight:600}.bad{color:var(--red);font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:12px;flex-wrap:wrap}
+.seg button{background:var(--surface);border:0;padding:6px 12px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--green);color:#fff}
+.matrix td{text-align:center;min-width:64px}
+.matrix td:first-child{text-align:left;white-space:normal;min-width:180px}
+.panel+.panel{margin-top:24px}
+@media (prefers-reduced-motion:no-preference){.fill,.stack span{transition:width .4s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Experiencia de ingresantes</h1>
+      <p class="sub">Encuesta posterior al entrenamiento en el local</p>
+    </div>
+    <div class="meta">
+      <span id="updated">Sin datos</span>
+      <button class="btn" id="reload">Actualizar</button>
+    </div>
+  </header>
+
+  <div id="banner"></div>
+
+  <div class="filters" id="filters">
+    <label>Período<select id="f-periodo">
+      <option value="all">Todo</option><option value="7">Últimos 7 días</option><option value="30">Últimos 30 días</option>
+    </select></label>
+    <label>Marca<select id="f-marca"></select></label>
+    <label>Zona<select id="f-zona"></select></label>
+    <label>Rol<select id="f-rol"></select></label>
+    <label>Antigüedad<select id="f-antig"></select></label>
+  </div>
+
+  <p class="hero" id="hero">Cargando respuestas…</p>
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Casos para revisar</h2>
+      <p class="hint">Experiencia mala, trato malo, casi sin entrenamiento, algo que no les gustó o pidieron contacto. Los rojos primero.</p>
+      <div class="alerts" id="alerts"></div>
+    </section>
+    <div class="stackcol">
+      <section class="panel">
+        <h2>Experiencia general</h2>
+        <div class="stack" id="dist"></div>
+        <div class="legend" id="dist-legend"></div>
+      </section>
+      <section class="panel">
+        <h2>Qué mejorar</h2>
+        <p class="hint" id="mejorar-hint"></p>
+        <div class="bars" id="mejorar"></div>
+      </section>
+    </div>
+  </div>
+
+  <section class="panel">
+    <h2>Resultados por grupo</h2>
+    <p class="hint">Tocá un encabezado para ordenar.</p>
+    <div class="seg" id="groupby" role="group" aria-label="Agrupar por">
+      <button data-k="zona" aria-pressed="true">Zona</button>
+      <button data-k="marca" aria-pressed="false">Marca</button>
+      <button data-k="local" aria-pressed="false">Local</button>
+      <button data-k="rol" aria-pressed="false">Rol</button>
+      <button data-k="antig" aria-pressed="false">Antigüedad</button>
+    </div>
+    <div class="scroll"><table id="tbl"></table></div>
+  </section>
+
+  <section class="panel">
+    <h2>Entrenamiento y experiencia</h2>
+    <p class="hint">Cantidad de respuestas según cómo los entrenaron y cómo calificaron su experiencia.</p>
+    <div class="scroll"><table class="matrix" id="matrix"></table></div>
+  </section>
+</div>
+
+<script>
+/* ===== CONFIGURACIÓN ===== */
+const CONFIG = {
+  CSV_URL: 'https://docs.google.com/spreadsheets/d/1Ts76W1aKa07FKaw8UVKFELk5EQX1YivTjgPqcjF214o/gviz/tq?tqx=out:csv&sheet=Respuestas&headers=1', // hoja Respuestas
+  API_URL: '',      // Opcional: Apps Script o API propia. Si hay CSV_URL, se usa el CSV
+  TOKEN: '',
+  REFRESH_MIN: 5    // Actualización automática en minutos (0 = desactivada)
+};
+
+const EXP_ORDER = ['Muy buena', 'Buena', 'Regular', 'Mala', 'Muy mala'];
+const EXP_COLOR = ['var(--green)', 'var(--green-2)', 'var(--amber)', 'var(--red-2)', 'var(--red)'];
+const SIN_QUEJAS = /^nada/i;
+const VACIO = /^(s\/d|-)?$/i;
+
+const DEMO = [["Fecha", "Rol", "Antigüedad", "Marca", "Zona", "Local", "Entrenamiento", "Trato en el local", "¿Sucedió algo?", "Pidió contacto", "Experiencia general", "Qué mejorar."]];
+
+/* ===== ESTADO ===== */
+let DATA = [];
+let groupKey = 'zona';
+let sortState = { col: 'n', dir: -1 };
+const $ = id => document.getElementById(id);
+
+/* ===== UTILIDADES ===== */
+const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[.:]+$/, '').trim();
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pctNum = (a, b) => b ? Math.round(a / b * 100) : null;
+const pct = (a, b) => b ? pctNum(a, b) + '%' : 'S/D';
+const cls = (v, invert) => v == null ? '' : invert ? (v <= 10 ? 'good' : v <= 25 ? 'mid' : 'bad') : (v >= 75 ? 'good' : v >= 50 ? 'mid' : 'bad');
+
+function parseFecha(s) {
+  const m = String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+  if (m) return new Date(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0));
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+
+function mapRows(rows) {
+  if (!rows || rows.length < 2) return [];
+  const h = rows[0].map(norm);
+  const exact = k => h.findIndex(x => x === k);
+  const has = k => h.findIndex(x => x.includes(k));
+  const idx = {
+    fecha: exact('fecha'), rol: exact('rol'), antig: has('antig'), marca: exact('marca'),
+    zona: exact('zona'), local: exact('local'), entren: has('entrenam'), trato: has('trato'),
+    paso: has('sucedi'), contacto: has('contacto'), exp: has('experiencia'), mejorar: has('mejorar')
+  };
+  const faltan = Object.keys(idx).filter(k => idx[k] < 0);
+  if (faltan.length) throw new Error('Faltan columnas en la hoja: ' + faltan.join(', '));
+  return rows.slice(1).filter(r => r.some(c => String(c).trim())).map(r => {
+    const o = {};
+    for (const k in idx) o[k] = String(r[idx[k]] ?? '').trim();
+    o.date = parseFecha(o.fecha);
+    o.expGood = /^(muy buena|buena)$/i.test(o.exp);
+    o.expBad = /mala/i.test(o.exp);
+    o.entrenOK = /^me explicaron tod/i.test(o.entren);
+    o.entrenBad = /^casi no/i.test(o.entren);
+    o.tratoGood = /^(muy bueno|bueno)$/i.test(o.trato);
+    o.incidente = /^s[ií]$/i.test(o.paso);
+    o.pidioContacto = !!o.contacto && !/^(s\/d|no|-)$/i.test(o.contacto);
+    o.reasons = [];
+    if (o.expBad) o.reasons.push({ t: 'Experiencia ' + o.exp.toLowerCase(), r: true });
+    if (o.entrenBad) o.reasons.push({ t: 'Casi sin entrenamiento', r: true });
+    if (/^malo$/i.test(o.trato)) o.reasons.push({ t: 'Trato malo', r: true });
+    if (o.incidente) o.reasons.push({ t: 'Sucedió algo', r: false });
+    if (o.pidioContacto) o.reasons.push({ t: 'Pidió contacto: ' + o.contacto, r: true });
+    o.score = o.reasons.reduce((s, x) => s + (x.r ? 2 : 1), 0);
+    return o;
+  });
+}
+
+/* ===== CSV ===== */
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; } else q = false;
+      } else field += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(field); field = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(field); rows.push(row); row = []; field = '';
+    } else field += c;
+  }
+  if (field !== '' || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+/* ===== CARGA ===== */
+async function load() {
+  const btn = $('reload');
+  btn.disabled = true;
+  $('banner').innerHTML = '';
+  try {
+    let rows;
+    if (CONFIG.CSV_URL) {
+      const sep = CONFIG.CSV_URL.includes('?') ? '&' : '?';
+      const res = await fetch(CONFIG.CSV_URL + sep + 't=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      if (/^\s*</.test(text)) throw new Error('Google no devolvió los datos (la hoja no está compartida)');
+      rows = parseCSV(text);
+    } else if (CONFIG.API_URL) {
+      const url = CONFIG.API_URL + (CONFIG.TOKEN ? '?key=' + encodeURIComponent(CONFIG.TOKEN) : '');
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || 'Respuesta inválida');
+      rows = json.rows;
+    } else {
+      rows = DEMO;
+      $('banner').innerHTML = '<div class="banner">Falta configurar la hoja: pegá el link CSV de "Publicar en la Web" en CONFIG.CSV_URL.</div>';
+    }
+    DATA = mapRows(rows);
+    fillFilters();
+    render();
+    $('updated').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  } catch (e) {
+    $('banner').innerHTML = '<div class="banner err">No se pudo leer la hoja: ' + esc(e.message) + '. Revisá que la planilla esté compartida como "Cualquier persona con el enlace: Lector" y que la hoja se llame Respuestas.</div>';
+    if (!DATA.length) $('hero').textContent = 'Sin datos para mostrar.';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ===== FILTROS ===== */
+const FILTERS = { marca: 'f-marca', zona: 'f-zona', rol: 'f-rol', antig: 'f-antig' };
+
+function fillFilters() {
+  for (const k in FILTERS) {
+    const sel = $(FILTERS[k]);
+    const prev = sel.value;
+    const vals = [...new Set(DATA.map(d => d[k]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+    sel.innerHTML = '<option value="">Todas</option>' + vals.map(v => '<option>' + esc(v) + '</option>').join('');
+    if (vals.includes(prev)) sel.value = prev;
+  }
+}
+
+function filtered() {
+  const dias = $('f-periodo').value;
+  const desde = dias === 'all' ? null : Date.now() - (+dias) * 864e5;
+  return DATA.filter(d => {
+    if (desde && (!d.date || d.date.getTime() < desde)) return false;
+    for (const k in FILTERS) { const v = $(FILTERS[k]).value; if (v && d[k] !== v) return false; }
+    return true;
+  });
+}
+
+/* ===== RENDER ===== */
+function render() {
+  const rows = filtered();
+  const n = rows.length;
+  const count = f => rows.filter(f).length;
+  const good = count(d => d.expGood);
+  const alerts = rows.filter(d => d.reasons.length);
+
+  $('hero').innerHTML = n
+    ? 'De <b>' + n + '</b> ingresantes, <b>' + good + '</b> calificaron su experiencia como buena o muy buena y <b>' + alerts.length + '</b> ' + (alerts.length === 1 ? 'tiene una alerta' : 'tienen alertas') + ' para revisar.'
+    : 'No hay respuestas con estos filtros.';
+
+  const kpis = [
+    ['Satisfacción', pctNum(good, n), 'buena o muy buena', false],
+    ['Entrenamiento completo', pctNum(count(d => d.entrenOK), n), 'les explicaron todo', false],
+    ['Buen trato en el local', pctNum(count(d => d.tratoGood), n), 'bueno o muy bueno', false],
+    ['Sucedió algo', pctNum(count(d => d.incidente), n), 'algo no les gustó', true],
+    ['Pidieron contacto', null, count(d => d.pidioContacto) + ' personas', null]
+  ];
+  $('kpis').innerHTML = kpis.map(([l, v, sub, inv]) => {
+    const val = inv === null ? count(d => d.pidioContacto) : (v == null ? 'S/D' : v + '%');
+    const c = inv === null ? (count(d => d.pidioContacto) ? 'bad' : 'good') : cls(v, inv);
+    return '<div class="kpi"><div class="v ' + c + '">' + val + '</div><div class="l">' + l + '</div><div class="n">' + (inv === null ? 'de ' + n + ' respuestas' : sub + ', N=' + n) + '</div></div>';
+  }).join('');
+
+  renderAlerts(alerts);
+  renderDist(rows);
+  renderMejorar(rows);
+  renderTable(rows);
+  renderMatrix(rows);
+}
+
+function renderAlerts(alerts) {
+  const list = alerts.slice().sort((a, b) => b.score - a.score || (b.date || 0) - (a.date || 0));
+  $('alerts').innerHTML = list.length ? list.map(d =>
+    '<article class="alert' + (d.score >= 3 ? ' high' : '') + '">' +
+      '<div class="h"><span class="loc">' + esc(d.local || 'S/D') + '</span><span class="who">' + esc(d.fecha) + '</span></div>' +
+      '<div class="who">' + esc([d.marca, d.zona, d.rol, d.antig].filter(Boolean).join(', ')) + '</div>' +
+      '<div class="tags">' + d.reasons.map(r => '<span class="tag' + (r.r ? ' r' : '') + '">' + esc(r.t) + '</span>').join('') + '</div>' +
+      '<p class="q">Entrenamiento: ' + esc(d.entren || 'S/D') + '. Trato: ' + esc(d.trato || 'S/D') + '. Mejorar: ' + esc(d.mejorar || 'S/D') + '</p>' +
+    '</article>'
+  ).join('') : '<p class="empty">Ningún caso para revisar con estos filtros.</p>';
+}
+
+function renderDist(rows) {
+  const n = rows.length;
+  const extra = [...new Set(rows.map(d => d.exp).filter(v => v && !EXP_ORDER.includes(v)))];
+  const cats = EXP_ORDER.concat(extra);
+  const counts = cats.map(c => rows.filter(d => d.exp === c).length);
+  const color = i => EXP_COLOR[i] || 'var(--muted)';
+  $('dist').innerHTML = n ? cats.map((c, i) => counts[i] ? '<span style="width:' + (counts[i] / n * 100) + '%;background:' + color(i) + '" title="' + esc(c) + ': ' + counts[i] + '"></span>' : '').join('') : '';
+  $('dist-legend').innerHTML = cats.map((c, i) => '<span><i style="background:' + color(i) + '"></i>' + esc(c) + ' ' + counts[i] + ' (' + pct(counts[i], n) + ')</span>').join('');
+}
+
+function renderMejorar(rows) {
+  const map = new Map();
+  let sinQuejas = 0;
+  rows.forEach(d => d.mejorar.split('|').map(s => s.trim()).filter(Boolean).forEach(m => {
+    if (VACIO.test(m)) return;
+    if (SIN_QUEJAS.test(m)) { sinQuejas++; return; }
+    map.set(m, (map.get(m) || 0) + 1);
+  }));
+  const list = [...map.entries()].sort((a, b) => b[1] - a[1]);
+  const max = list.length ? list[0][1] : 1;
+  $('mejorar-hint').textContent = sinQuejas + ' de ' + rows.length + ' respondieron que no hay nada para mejorar (' + pct(sinQuejas, rows.length) + ').';
+  $('mejorar').innerHTML = list.length ? list.map(([m, c]) =>
+    '<div class="bar"><div class="t"><span>' + esc(m) + '</span><span>' + c + '</span></div><div class="track"><div class="fill" style="width:' + (c / max * 100) + '%"></div></div></div>'
+  ).join('') : '<p class="empty">Sin pedidos de mejora.</p>';
+}
+
+const COLS = [
+  { k: 'g', l: 'Grupo' }, { k: 'n', l: 'Respuestas' }, { k: 'sat', l: 'Satisfacción' },
+  { k: 'ent', l: 'Entrenamiento completo' }, { k: 'trato', l: 'Buen trato' },
+  { k: 'inc', l: 'Sucedió algo', inv: true }, { k: 'al', l: 'Alertas' }
+];
+
+function renderTable(rows) {
+  const groups = new Map();
+  rows.forEach(d => { const g = d[groupKey] || 'S/D'; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(d); });
+  const data = [...groups.entries()].map(([g, arr]) => {
+    const n = arr.length, c = f => arr.filter(f).length;
+    return { g, n, sat: pctNum(c(d => d.expGood), n), ent: pctNum(c(d => d.entrenOK), n), trato: pctNum(c(d => d.tratoGood), n), inc: pctNum(c(d => d.incidente), n), al: c(d => d.reasons.length) };
+  });
+  const { col, dir } = sortState;
+  data.sort((a, b) => {
+    const x = a[col], y = b[col];
+    if (typeof x === 'string') return x.localeCompare(y, 'es') * dir;
+    return ((x ?? -1) - (y ?? -1)) * dir;
+  });
+  const head = '<thead><tr>' + COLS.map(c => '<th scope="col"><button data-col="' + c.k + '"' + (c.k === col ? ' aria-sort="' + (dir > 0 ? 'ascending' : 'descending') + '"' : '') + '>' + c.l + (c.k === col ? (dir > 0 ? ' ▲' : ' ▼') : '') + '</button></th>').join('') + '</tr></thead>';
+  const body = '<tbody>' + (data.length ? data.map(r => '<tr>' + COLS.map(c => {
+    if (c.k === 'g') return '<td>' + esc(r.g) + '</td>';
+    if (c.k === 'n' || c.k === 'al') return '<td' + (c.k === 'al' && r.al ? ' class="bad"' : '') + '>' + r[c.k] + '</td>';
+    const v = r[c.k];
+    return '<td class="' + cls(v, c.inv) + '">' + (v == null ? 'S/D' : v + '%') + '</td>';
+  }).join('') + '</tr>').join('') : '<tr><td colspan="' + COLS.length + '">S/D</td></tr>') + '</tbody>';
+  $('tbl').innerHTML = head + body;
+}
+
+function renderMatrix(rows) {
+  const ents = [...new Set(rows.map(d => d.entren || 'S/D'))]
+    .sort((a, b) => rows.filter(d => d.entren === b).length - rows.filter(d => d.entren === a).length);
+  const extra = [...new Set(rows.map(d => d.exp).filter(v => v && !EXP_ORDER.includes(v)))];
+  const exps = EXP_ORDER.concat(extra);
+  let max = 1;
+  const cell = ents.map(e => exps.map(x => { const c = rows.filter(d => (d.entren || 'S/D') === e && d.exp === x).length; if (c > max) max = c; return c; }));
+  const head = '<thead><tr><th scope="col">Entrenamiento</th>' + exps.map(x => '<th scope="col">' + esc(x) + '</th>').join('') + '</tr></thead>';
+  const body = '<tbody>' + (ents.length ? ents.map((e, i) => '<tr><td>' + esc(e) + '</td>' + exps.map((x, j) => {
+    const c = cell[i][j];
+    const base = j < 2 ? 'var(--green)' : j === 2 ? 'var(--amber)' : 'var(--red)';
+    const bg = c ? 'background:color-mix(in srgb,' + base + ' ' + Math.round(15 + c / max * 55) + '%,transparent)' : '';
+    return '<td style="' + bg + '">' + (c || '') + '</td>';
+  }).join('') + '</tr>').join('') : '<tr><td colspan="' + (exps.length + 1) + '">S/D</td></tr>') + '</tbody>';
+  $('matrix').innerHTML = head + body;
+}
+
+/* ===== EVENTOS ===== */
+$('reload').addEventListener('click', load);
+['f-periodo', 'f-marca', 'f-zona', 'f-rol', 'f-antig'].forEach(id => $(id).addEventListener('change', render));
+$('groupby').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  groupKey = b.dataset.k;
+  $('groupby').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+  render();
+});
+$('tbl').addEventListener('click', e => {
+  const b = e.target.closest('button[data-col]'); if (!b) return;
+  const col = b.dataset.col;
+  sortState = { col, dir: sortState.col === col ? -sortState.dir : (col === 'g' ? 1 : -1) };
+  render();
+});
+
+load();
+if (CONFIG.REFRESH_MIN > 0) setInterval(load, CONFIG.REFRESH_MIN * 60000);
+</script>
+</body>
+</html>
