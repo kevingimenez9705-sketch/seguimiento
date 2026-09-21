@@ -141,7 +141,7 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
 
   <section class="panel">
     <h2>Entrenamiento por grupo</h2>
-    <p class="hint">Cómo fue el entrenamiento en cada grupo (la satisfacción general ya está arriba). Tocá un encabezado para ordenar.</p>
+    <p class="hint">Cómo fue el entrenamiento en cada grupo. Tocá un encabezado para ordenar.</p>
     <div class="seg" id="groupby" role="group" aria-label="Agrupar por">
       <button data-k="zona" aria-pressed="true">Zona</button>
       <button data-k="marca" aria-pressed="false">Marca</button>
@@ -377,12 +377,17 @@ function renderMejorar(rows) {
   ).join('') : '<p class="empty">Sin pedidos de mejora.</p>';
 }
 
+const NIVEL_PESO = { todo: 4, basico: 3, poco: 2, casi: 1 };
+const NIVEL_LABEL = { 4: 'Completo', 3: 'Básico', 2: 'Poco', 1: 'Casi nada' };
+const NIVEL_CLASS = { 4: 'good', 3: 'mid', 2: 'bad', 1: 'bad' };
+
 const COLS = [
   { k: 'g', l: 'Grupo' }, { k: 'n', l: 'Respuestas' },
-  { k: 'todo', l: 'Todo', h: '% que respondió "me explicaron todo con paciencia"' },
+  { k: 'todo', l: 'Completo', h: '% que respondió "me explicaron todo con paciencia"' },
   { k: 'basico', l: 'Básico', h: '% que respondió "me explicaron lo básico y me fui acomodando"' },
   { k: 'poco', l: 'Poco', inv: true, h: '% que respondió "me explicaron poco, aprendí mirando"' },
-  { k: 'casi', l: 'Casi nada', inv: true, h: '% que respondió "casi no me explicaron nada"' }
+  { k: 'casi', l: 'Casi nada', inv: true, h: '% que respondió "casi no me explicaron nada"' },
+  { k: 'nivel', l: 'Promedio', h: 'Nivel de entrenamiento promedio del grupo: pondera Completo=4, Básico=3, Poco=2, Casi nada=1 y redondea al más cercano' }
 ];
 
 function renderTable(rows) {
@@ -390,7 +395,10 @@ function renderTable(rows) {
   rows.forEach(d => { const g = d[groupKey] || 'S/D'; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(d); });
   const data = [...groups.entries()].map(([g, arr]) => {
     const n = arr.length, c = f => arr.filter(f).length;
-    return { g, n, todo: pctNum(c(d => d.entrenCat === 'todo'), n), basico: pctNum(c(d => d.entrenCat === 'basico'), n), poco: pctNum(c(d => d.entrenCat === 'poco'), n), casi: pctNum(c(d => d.entrenCat === 'casi'), n) };
+    const counts = { todo: c(d => d.entrenCat === 'todo'), basico: c(d => d.entrenCat === 'basico'), poco: c(d => d.entrenCat === 'poco'), casi: c(d => d.entrenCat === 'casi') };
+    const clasificados = counts.todo + counts.basico + counts.poco + counts.casi;
+    const avg = clasificados ? Object.keys(counts).reduce((s, k) => s + counts[k] * NIVEL_PESO[k], 0) / clasificados : null;
+    return { g, n, todo: pctNum(counts.todo, n), basico: pctNum(counts.basico, n), poco: pctNum(counts.poco, n), casi: pctNum(counts.casi, n), nivel: avg == null ? null : Math.round(avg) };
   });
   const { col, dir } = sortState;
   data.sort((a, b) => {
@@ -402,6 +410,7 @@ function renderTable(rows) {
   const body = '<tbody>' + (data.length ? data.map(r => '<tr>' + COLS.map(c => {
     if (c.k === 'g') return '<td>' + esc(r.g) + '</td>';
     if (c.k === 'n') return '<td>' + r.n + '</td>';
+    if (c.k === 'nivel') return '<td class="' + (r.nivel == null ? '' : NIVEL_CLASS[r.nivel]) + '">' + (r.nivel == null ? 'S/D' : NIVEL_LABEL[r.nivel]) + '</td>';
     const v = r[c.k];
     return '<td class="' + cls(v, c.inv) + '">' + (v == null ? 'S/D' : v + '%') + '</td>';
   }).join('') + '</tr>').join('') : '<tr><td colspan="' + COLS.length + '">S/D</td></tr>') + '</tbody>';
