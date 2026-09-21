@@ -87,8 +87,6 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
 .seg button{background:var(--surface);border:0;padding:6px 12px;cursor:pointer;border-right:1px solid var(--line)}
 .seg button:last-child{border-right:0}
 .seg button[aria-pressed="true"]{background:var(--green);color:#fff}
-.matrix td{text-align:center;min-width:64px}
-.matrix td:first-child{text-align:left;white-space:normal;min-width:180px}
 .panel+.panel{margin-top:24px}
 @media (prefers-reduced-motion:no-preference){.fill,.stack span{transition:width .4s ease}}
 </style>
@@ -152,12 +150,6 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
       <button data-k="antig" aria-pressed="false">Antigüedad</button>
     </div>
     <div class="scroll"><table id="tbl"></table></div>
-  </section>
-
-  <section class="panel">
-    <h2>Entrenamiento y experiencia</h2>
-    <p class="hint">Por cada tipo de entrenamiento, % de personas que calificó su experiencia en cada nivel (el color más intenso = mayor proporción dentro de esa fila).</p>
-    <div class="scroll"><table class="matrix" id="matrix"></table></div>
   </section>
 </div>
 
@@ -326,7 +318,7 @@ function render() {
 
   const kpis = [
     ['Satisfacción', pctNum(good, n), 'buena o muy buena', false],
-    ['Entrenamiento completo', pctNum(count(d => d.entrenOK), n), 'les explicaron todo', false],
+    ['Explicaron todo con paciencia', pctNum(count(d => d.entrenOK), n), 'el resto tuvo entrenamiento parcial, no ausencia de entrenamiento', false],
     ['Buen trato en el local', pctNum(count(d => d.tratoGood), n), 'bueno o muy bueno', false],
     ['Sucedió algo', pctNum(count(d => d.incidente), n), 'algo no les gustó', true],
     ['Pidieron contacto', null, count(d => d.pidioContacto) + ' personas', null]
@@ -341,7 +333,6 @@ function render() {
   renderDist(rows);
   renderMejorar(rows);
   renderTable(rows);
-  renderMatrix(rows);
 }
 
 function renderAlerts(alerts) {
@@ -385,7 +376,7 @@ function renderMejorar(rows) {
 const COLS = [
   { k: 'g', l: 'Grupo' }, { k: 'n', l: 'Respuestas' },
   { k: 'sat', l: 'Satisfacción', h: '% que calificó su experiencia como buena o muy buena' },
-  { k: 'ent', l: 'Entrenamiento completo', h: '% que respondió "me explicaron todo"' },
+  { k: 'ent', l: 'Explicaron todo', h: '% que eligió "me explicaron todo con paciencia". 0% no significa sin entrenamiento, sino que nadie eligió esa opción exacta (pueden haber tenido entrenamiento parcial)' },
   { k: 'trato', l: 'Buen trato', h: '% que calificó el trato como bueno o muy bueno' },
   { k: 'inc', l: 'Sucedió algo', inv: true, h: '% que respondió que sí pasó algo que no le gustó' },
   { k: 'al', l: 'Alertas', h: 'Respuestas con al menos un motivo de alerta' }
@@ -412,27 +403,6 @@ function renderTable(rows) {
     return '<td class="' + cls(v, c.inv) + '">' + (v == null ? 'S/D' : v + '%') + '</td>';
   }).join('') + '</tr>').join('') : '<tr><td colspan="' + COLS.length + '">S/D</td></tr>') + '</tbody>';
   $('tbl').innerHTML = head + body;
-}
-
-function renderMatrix(rows) {
-  const ents = [...new Set(rows.map(d => d.entren || 'S/D'))]
-    .sort((a, b) => rows.filter(d => d.entren === b).length - rows.filter(d => d.entren === a).length);
-  const extra = [...new Set(rows.map(d => d.exp).filter(v => v && !EXP_ORDER.includes(v)))];
-  const exps = EXP_ORDER.concat(extra);
-  const cell = ents.map(e => exps.map(x => rows.filter(d => (d.entren || 'S/D') === e && d.exp === x).length));
-  const head = '<thead><tr><th scope="col">Entrenamiento</th>' + exps.map(x => '<th scope="col">' + esc(x) + '</th>').join('') + '</tr></thead>';
-  const body = '<tbody>' + (ents.length ? ents.map((e, i) => {
-    const total = cell[i].reduce((s, c) => s + c, 0) || 1;
-    return '<tr><td>' + esc(e) + '</td>' + exps.map((x, j) => {
-      const c = cell[i][j];
-      const p = c / total;
-      const base = j < 2 ? 'var(--green)' : j === 2 ? 'var(--amber)' : 'var(--red)';
-      const bg = c ? 'background:color-mix(in srgb,' + base + ' ' + Math.round(15 + p * 70) + '%,transparent)' : '';
-      const label = c ? c + ' (' + Math.round(p * 100) + '%)' : '';
-      return '<td style="' + bg + '" title="' + Math.round(p * 100) + '% de este grupo">' + label + '</td>';
-    }).join('') + '</tr>';
-  }).join('') : '<tr><td colspan="' + (exps.length + 1) + '">S/D</td></tr>') + '</tbody>';
-  $('matrix').innerHTML = head + body;
 }
 
 /* ===== EVENTOS ===== */
