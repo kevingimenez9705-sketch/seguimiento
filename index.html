@@ -45,7 +45,10 @@ button,select{font:inherit;color:inherit}
 .filters select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
 .hero{font-size:clamp(1.3rem,2.6vw,2rem);line-height:1.3;font-weight:500;max-width:34ch;margin:0 0 24px;letter-spacing:-.01em}
 .hero b{font-weight:700}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:28px}
+.kpis-group{margin-bottom:20px}
+.kpis-label{color:var(--muted);font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.kpis-group.alert .kpis{border-color:var(--red-2)}
 .kpi{background:var(--surface);padding:14px 16px}
 .kpi .v{font-size:1.7rem;font-weight:700;line-height:1.1}
 .kpi .l{color:var(--muted);font-size:.85rem}
@@ -116,7 +119,15 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
   </div>
 
   <p class="hero" id="hero">Cargando respuestas…</p>
-  <div class="kpis" id="kpis"></div>
+
+  <div class="kpis-group">
+    <p class="kpis-label">Cómo fue la experiencia</p>
+    <div class="kpis" id="kpis-good"></div>
+  </div>
+  <div class="kpis-group alert">
+    <p class="kpis-label">Para revisar</p>
+    <div class="kpis" id="kpis-alert"></div>
+  </div>
 
   <div class="grid">
     <section class="panel">
@@ -321,18 +332,22 @@ function render() {
     ? 'De <b>' + n + '</b> ingresantes, <b>' + good + '</b> calificaron su experiencia como buena o muy buena y <b>' + alerts.length + '</b> ' + (alerts.length === 1 ? 'tiene una alerta' : 'tienen alertas') + ' para revisar.'
     : 'No hay respuestas con estos filtros.';
 
-  const kpis = [
-    ['Satisfacción', pctNum(good, n), 'buena o muy buena', false],
-    ['Explicaron todo', pctNum(count(d => d.entrenOK), n), 'con paciencia (resto: parcial)', false],
-    ['Buen trato', pctNum(count(d => d.tratoGood), n), 'bueno o muy bueno', false],
+  const kpiGood = [
+    ['Satisfacción', pctNum(good, n), 'buena o muy buena'],
+    ['Explicaron todo', pctNum(count(d => d.entrenOK), n), 'con paciencia (resto: parcial)'],
+    ['Buen trato', pctNum(count(d => d.tratoGood), n), 'bueno o muy bueno']
+  ].sort((a, b) => (b[1] ?? -1) - (a[1] ?? -1));
+  const kpiAlert = [
     ['Sucedió algo', pctNum(count(d => d.incidente), n), 'no les gustó', true],
     ['Pidieron contacto', null, count(d => d.pidioContacto) + ' personas', null]
   ];
-  $('kpis').innerHTML = kpis.map(([l, v, sub, inv]) => {
+  const renderKpi = ([l, v, sub, inv]) => {
     const val = inv === null ? count(d => d.pidioContacto) : (v == null ? 'S/D' : v + '%');
     const c = inv === null ? (count(d => d.pidioContacto) ? 'bad' : 'good') : cls(v, inv);
     return '<div class="kpi"><div class="v ' + c + '">' + val + '</div><div class="l">' + l + '</div><div class="n">' + (inv === null ? 'de ' + n + ' respuestas' : sub) + '</div></div>';
-  }).join('');
+  };
+  $('kpis-good').innerHTML = kpiGood.map(renderKpi).join('');
+  $('kpis-alert').innerHTML = kpiAlert.map(renderKpi).join('');
 
   renderAlerts(alerts);
   renderDist(rows);
