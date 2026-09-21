@@ -50,7 +50,7 @@ button,select{font:inherit;color:inherit}
 .kpi .v{font-size:1.7rem;font-weight:700;line-height:1.1}
 .kpi .l{color:var(--muted);font-size:.85rem}
 .kpi .n{color:var(--muted);font-size:.75rem}
-.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:24px;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px}
 @media (max-width:860px){.grid{grid-template-columns:1fr}}
 section.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
 h2{font-size:1.05rem;margin:0 0 4px;font-weight:600}
@@ -74,7 +74,6 @@ h2{font-size:1.05rem;margin:0 0 4px;font-weight:600}
 .bar .t{display:flex;justify-content:space-between;gap:8px;font-size:.88rem}
 .bar .track{height:8px;background:var(--line);border-radius:4px;margin-top:3px}
 .bar .fill{height:100%;background:var(--green);border-radius:4px}
-.stackcol{display:flex;flex-direction:column;gap:24px}
 .scroll{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:.88rem}
 th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -121,22 +120,15 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
 
   <div class="grid">
     <section class="panel">
-      <h2>Casos para revisar</h2>
-      <p class="hint">Experiencia mala, trato malo, casi sin entrenamiento, algo que no les gustó o pidieron contacto. Los rojos primero.</p>
-      <div class="alerts" id="alerts"></div>
+      <h2>Experiencia general</h2>
+      <div class="stack" id="dist"></div>
+      <div class="legend" id="dist-legend"></div>
     </section>
-    <div class="stackcol">
-      <section class="panel">
-        <h2>Experiencia general</h2>
-        <div class="stack" id="dist"></div>
-        <div class="legend" id="dist-legend"></div>
-      </section>
-      <section class="panel">
-        <h2>Qué mejorar</h2>
-        <p class="hint" id="mejorar-hint"></p>
-        <div class="bars" id="mejorar"></div>
-      </section>
-    </div>
+    <section class="panel">
+      <h2>Qué mejorar</h2>
+      <p class="hint" id="mejorar-hint"></p>
+      <div class="bars" id="mejorar"></div>
+    </section>
   </div>
 
   <section class="panel">
@@ -150,6 +142,14 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
       <button data-k="antig" aria-pressed="false">Antigüedad</button>
     </div>
     <div class="scroll"><table id="tbl"></table></div>
+  </section>
+
+  <section class="panel">
+    <h2>Casos para revisar</h2>
+    <p class="hint">Experiencia mala, trato malo, casi sin entrenamiento, algo que no les gustó o pidieron contacto. Los rojos primero.</p>
+    <p class="hint" id="alerts-hint"></p>
+    <div class="bars" id="alerts-motivos"></div>
+    <div class="alerts" id="alerts"></div>
   </section>
 </div>
 
@@ -214,12 +214,13 @@ function mapRows(rows) {
       : /^me explicaron poco/i.test(o.entren) ? 'poco'
       : /^casi no/i.test(o.entren) ? 'casi' : null;
     o.tratoGood = /^(muy bueno|bueno)$/i.test(o.trato);
+    o.tratoMalo = /^malo$/i.test(o.trato);
     o.incidente = /^s[ií]$/i.test(o.paso);
     o.pidioContacto = !!o.contacto && !/^(s\/d|no|-)$/i.test(o.contacto);
     o.reasons = [];
     if (o.expBad) o.reasons.push({ t: 'Experiencia ' + o.exp.toLowerCase(), r: true });
     if (o.entrenBad) o.reasons.push({ t: 'Casi sin entrenamiento', r: true });
-    if (/^malo$/i.test(o.trato)) o.reasons.push({ t: 'Trato malo', r: true });
+    if (o.tratoMalo) o.reasons.push({ t: 'Trato malo', r: true });
     if (o.incidente) o.reasons.push({ t: 'Sucedió algo', r: false });
     if (o.pidioContacto) o.reasons.push({ t: 'Pidió contacto: ' + o.contacto, r: true });
     o.score = o.reasons.reduce((s, x) => s + (x.r ? 2 : 1), 0);
@@ -322,15 +323,15 @@ function render() {
 
   const kpis = [
     ['Satisfacción', pctNum(good, n), 'buena o muy buena', false],
-    ['Explicaron todo con paciencia', pctNum(count(d => d.entrenOK), n), 'el resto tuvo entrenamiento parcial, no ausencia de entrenamiento', false],
-    ['Buen trato en el local', pctNum(count(d => d.tratoGood), n), 'bueno o muy bueno', false],
-    ['Sucedió algo', pctNum(count(d => d.incidente), n), 'algo no les gustó', true],
+    ['Explicaron todo', pctNum(count(d => d.entrenOK), n), 'con paciencia (resto: parcial)', false],
+    ['Buen trato', pctNum(count(d => d.tratoGood), n), 'bueno o muy bueno', false],
+    ['Sucedió algo', pctNum(count(d => d.incidente), n), 'no les gustó', true],
     ['Pidieron contacto', null, count(d => d.pidioContacto) + ' personas', null]
   ];
   $('kpis').innerHTML = kpis.map(([l, v, sub, inv]) => {
     const val = inv === null ? count(d => d.pidioContacto) : (v == null ? 'S/D' : v + '%');
     const c = inv === null ? (count(d => d.pidioContacto) ? 'bad' : 'good') : cls(v, inv);
-    return '<div class="kpi"><div class="v ' + c + '">' + val + '</div><div class="l">' + l + '</div><div class="n">' + (inv === null ? 'de ' + n + ' respuestas' : sub + ', N=' + n) + '</div></div>';
+    return '<div class="kpi"><div class="v ' + c + '">' + val + '</div><div class="l">' + l + '</div><div class="n">' + (inv === null ? 'de ' + n + ' respuestas' : sub) + '</div></div>';
   }).join('');
 
   renderAlerts(alerts);
@@ -339,7 +340,22 @@ function render() {
   renderTable(rows);
 }
 
+const MOTIVOS = [
+  ['Experiencia mala', d => d.expBad],
+  ['Casi sin entrenamiento', d => d.entrenBad],
+  ['Trato malo', d => d.tratoMalo],
+  ['Sucedió algo', d => d.incidente],
+  ['Pidió contacto', d => d.pidioContacto]
+];
+
 function renderAlerts(alerts) {
+  $('alerts-hint').textContent = alerts.length + ' de las respuestas filtradas tienen al menos un motivo de alerta.';
+  const counts = MOTIVOS.map(([l, f]) => [l, alerts.filter(f).length]).filter(([, c]) => c > 0).sort((a, b) => b[1] - a[1]);
+  const max = counts.length ? counts[0][1] : 1;
+  $('alerts-motivos').innerHTML = alerts.length ? counts.map(([l, c]) =>
+    '<div class="bar"><div class="t"><span>' + esc(l) + '</span><span>' + c + '</span></div><div class="track"><div class="fill" style="width:' + (c / max * 100) + '%"></div></div></div>'
+  ).join('') : '';
+
   const list = alerts.slice().sort((a, b) => b.score - a.score || (b.date || 0) - (a.date || 0));
   $('alerts').innerHTML = list.length ? list.map(d =>
     '<article class="alert' + (d.score >= 3 ? ' high' : '') + '">' +
