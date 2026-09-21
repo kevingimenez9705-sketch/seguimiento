@@ -383,9 +383,12 @@ function renderMejorar(rows) {
 }
 
 const COLS = [
-  { k: 'g', l: 'Grupo' }, { k: 'n', l: 'Respuestas' }, { k: 'sat', l: 'Satisfacción' },
-  { k: 'ent', l: 'Entrenamiento completo' }, { k: 'trato', l: 'Buen trato' },
-  { k: 'inc', l: 'Sucedió algo', inv: true }, { k: 'al', l: 'Alertas' }
+  { k: 'g', l: 'Grupo' }, { k: 'n', l: 'Respuestas' },
+  { k: 'sat', l: 'Satisfacción', h: '% que calificó su experiencia como buena o muy buena' },
+  { k: 'ent', l: 'Entrenamiento completo', h: '% que respondió "me explicaron todo"' },
+  { k: 'trato', l: 'Buen trato', h: '% que calificó el trato como bueno o muy bueno' },
+  { k: 'inc', l: 'Sucedió algo', inv: true, h: '% que respondió que sí pasó algo que no le gustó' },
+  { k: 'al', l: 'Alertas', h: 'Respuestas con al menos un motivo de alerta' }
 ];
 
 function renderTable(rows) {
@@ -401,7 +404,7 @@ function renderTable(rows) {
     if (typeof x === 'string') return x.localeCompare(y, 'es') * dir;
     return ((x ?? -1) - (y ?? -1)) * dir;
   });
-  const head = '<thead><tr>' + COLS.map(c => '<th scope="col"><button data-col="' + c.k + '"' + (c.k === col ? ' aria-sort="' + (dir > 0 ? 'ascending' : 'descending') + '"' : '') + '>' + c.l + (c.k === col ? (dir > 0 ? ' ▲' : ' ▼') : '') + '</button></th>').join('') + '</tr></thead>';
+  const head = '<thead><tr>' + COLS.map(c => '<th scope="col"' + (c.h ? ' title="' + esc(c.h) + '"' : '') + '><button data-col="' + c.k + '"' + (c.k === col ? ' aria-sort="' + (dir > 0 ? 'ascending' : 'descending') + '"' : '') + '>' + c.l + (c.k === col ? (dir > 0 ? ' ▲' : ' ▼') : '') + '</button></th>').join('') + '</tr></thead>';
   const body = '<tbody>' + (data.length ? data.map(r => '<tr>' + COLS.map(c => {
     if (c.k === 'g') return '<td>' + esc(r.g) + '</td>';
     if (c.k === 'n' || c.k === 'al') return '<td' + (c.k === 'al' && r.al ? ' class="bad"' : '') + '>' + r[c.k] + '</td>';
