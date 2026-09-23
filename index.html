@@ -344,10 +344,9 @@ function render() {
   const count = f => rows.filter(f).length;
   const alerts = rows.filter(d => d.reasons.length);
   const good = count(d => d.expGood);
-  const goodNoAlert = count(d => d.expGood && !d.reasons.length);
 
   $('hero').innerHTML = n
-    ? 'De <b>' + n + '</b> ingresantes, <b>' + goodNoAlert + '</b> calificaron su experiencia como buena o muy buena sin alertas y <b>' + alerts.length + '</b> ' + (alerts.length === 1 ? 'tiene una alerta' : 'tienen alertas') + ' para revisar.'
+    ? 'De <b>' + n + '</b> ingresantes, <b>' + good + '</b> (' + pct(good, n) + ') calificaron su experiencia como buena o muy buena.'
     : 'No hay respuestas con estos filtros.';
 
   const kpiGood = [
