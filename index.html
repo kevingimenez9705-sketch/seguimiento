@@ -115,6 +115,8 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
     <label>Zona<select id="f-zona"></select></label>
     <label>Rol<select id="f-rol"></select></label>
     <label>Antigüedad<select id="f-antig"></select></label>
+    <label>Edad<select id="f-edad"></select></label>
+    <label>Exp. Fast-food<select id="f-fastfood"></select></label>
   </div>
 
   <p class="hero" id="hero">Cargando respuestas…</p>
@@ -151,6 +153,8 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
       <button data-k="local" aria-pressed="false">Local</button>
       <button data-k="rol" aria-pressed="false">Rol</button>
       <button data-k="antig" aria-pressed="false">Antigüedad</button>
+      <button data-k="edad" aria-pressed="false">Edad</button>
+      <button data-k="fastfood" aria-pressed="false">Exp. Fast-food</button>
     </div>
     <div class="scroll"><table id="tbl"></table></div>
   </section>
@@ -208,13 +212,15 @@ function mapRows(rows) {
   const idx = {
     fecha: exact('fecha'), rol: exact('rol'), antig: has('antig'), marca: exact('marca'),
     zona: exact('zona'), local: exact('local'), entren: has('entrenam'), trato: has('trato'),
-    paso: has('sucedi'), contacto: has('contacto'), exp: has('experiencia'), mejorar: has('mejorar')
+    paso: has('sucedi'), contacto: has('contacto'), exp: has('experiencia general'), mejorar: has('mejorar'),
+    edad: h.findIndex(x => /(^|[^a-z])edad/.test(x)), fastfood: has('fast')
   };
-  const faltan = Object.keys(idx).filter(k => idx[k] < 0);
+  const OPCIONALES = ['edad', 'fastfood']; // preguntas nuevas: respuestas viejas quedan vacías
+  const faltan = Object.keys(idx).filter(k => idx[k] < 0 && !OPCIONALES.includes(k));
   if (faltan.length) throw new Error('Faltan columnas en la hoja: ' + faltan.join(', '));
   return rows.slice(1).filter(r => r.some(c => String(c).trim())).map(r => {
     const o = {};
-    for (const k in idx) o[k] = String(r[idx[k]] ?? '').trim();
+    for (const k in idx) o[k] = idx[k] < 0 ? '' : String(r[idx[k]] ?? '').trim();
     o.date = parseFecha(o.fecha);
     o.expGood = /^(muy buena|buena)$/i.test(o.exp);
     o.expBad = /mala/i.test(o.exp);
@@ -298,7 +304,7 @@ async function load() {
 }
 
 /* ===== FILTROS ===== */
-const FILTERS = { marca: 'f-marca', zona: 'f-zona', rol: 'f-rol', antig: 'f-antig' };
+const FILTERS = { marca: 'f-marca', zona: 'f-zona', rol: 'f-rol', antig: 'f-antig', edad: 'f-edad', fastfood: 'f-fastfood' };
 
 function fillFilters() {
   for (const k in FILTERS) {
@@ -453,7 +459,7 @@ function renderTable(rows) {
 
 /* ===== EVENTOS ===== */
 $('reload').addEventListener('click', load);
-['f-periodo', 'f-marca', 'f-zona', 'f-rol', 'f-antig'].forEach(id => $(id).addEventListener('change', render));
+['f-periodo', 'f-marca', 'f-zona', 'f-rol', 'f-antig', 'f-edad', 'f-fastfood'].forEach(id => $(id).addEventListener('change', render));
 $('groupby').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   groupKey = b.dataset.k;
