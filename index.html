@@ -416,22 +416,26 @@ function renderDist(rows) {
   $('dist-legend').innerHTML = cats.map((c, i) => '<span><i style="background:' + color(i) + '"></i>' + esc(c) + ' ' + counts[i] + ' (' + pct(counts[i], n) + ')</span>').join('');
 }
 
+const PERFIL_CATS = [
+  ['Buena / Muy buena', 'var(--green)', d => d.expGood],
+  ['Regular', 'var(--amber)', d => d.exp && !d.expGood && !d.expBad],
+  ['Mala / Muy mala', 'var(--red)', d => d.expBad]
+];
+
 function renderPerfil(rows) {
-  const cats = EXP_ORDER.concat([...new Set(rows.map(d => d.exp).filter(v => v && !EXP_ORDER.includes(v)))]);
-  const color = i => EXP_COLOR[i] || 'var(--muted)';
   const chart = (id, k) => {
     const groups = new Map();
-    rows.forEach(d => { if (d[k]) groups.set(d[k], (groups.get(d[k]) || []).concat(d)); });
+    rows.forEach(d => { if (d[k] && d.exp) groups.set(d[k], (groups.get(d[k]) || []).concat(d)); });
     const list = [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0], 'es', { numeric: true }));
     $(id).innerHTML = list.length ? list.map(([g, arr]) => {
-      const n = arr.length, good = pctNum(arr.filter(d => d.expGood).length, n), bad = pctNum(arr.filter(d => d.expBad).length, n);
-      return '<div class="bar"><div class="t"><span>' + esc(g) + '</span><span><b class="good">' + good + '% buena</b> · <b class="bad">' + bad + '% mala</b></span></div>' +
-        '<div class="stack">' + cats.map((c, i) => { const m = arr.filter(d => d.exp === c).length; return m ? '<span style="width:' + (m / n * 100) + '%;background:' + color(i) + '" title="' + esc(c) + ': ' + m + ' de ' + n + '"></span>' : ''; }).join('') + '</div></div>';
+      const n = arr.length, parts = PERFIL_CATS.map(([l, c, f]) => [l, c, arr.filter(f).length]);
+      return '<div class="bar"><div class="t"><span>' + esc(g) + '</span><span><b class="good">' + pct(parts[0][2], n) + ' buena</b> · <b class="bad">' + pct(parts[2][2], n) + ' mala</b></span></div>' +
+        '<div class="stack">' + parts.map(([l, c, m]) => m ? '<span style="width:' + (m / n * 100) + '%;background:' + c + '" title="' + esc(l) + ': ' + m + ' de ' + n + '"></span>' : '').join('') + '</div></div>';
     }).join('') : '<p class="empty">Sin respuestas con este dato.</p>';
   };
   chart('chart-edad', 'edad');
   chart('chart-fastfood', 'fastfood');
-  $('perfil-legend').innerHTML = cats.map((c, i) => '<span><i style="background:' + color(i) + '"></i>' + esc(c) + '</span>').join('');
+  $('perfil-legend').innerHTML = PERFIL_CATS.map(([l, c]) => '<span><i style="background:' + c + '"></i>' + l + '</span>').join('');
 }
 
 function renderMejorar(rows) {
