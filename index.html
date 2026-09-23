@@ -89,6 +89,10 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
 .seg button:last-child{border-right:0}
 .seg button[aria-pressed="true"]{background:var(--green);color:#fff}
 .panel+.panel{margin-top:24px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.charts h3{font-size:.95rem;margin:0 0 10px;font-weight:600}
+.charts .stack{height:16px;margin:3px 0 0}
+.charts .bar .n{color:var(--muted);font-size:.82rem}
 @media (prefers-reduced-motion:no-preference){.fill,.stack span{transition:width .4s ease}}
 </style>
 </head>
@@ -136,6 +140,16 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
     <h2>Experiencia general</h2>
     <div class="stack" id="dist"></div>
     <div class="legend" id="dist-legend"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Perfil de ingresantes</h2>
+    <p class="hint">Cantidad de respuestas y cómo calificaron la experiencia general en cada grupo.</p>
+    <div class="charts">
+      <div><h3>Edad</h3><div class="bars" id="chart-edad"></div></div>
+      <div><h3>Experiencia previa en Fast-food</h3><div class="bars" id="chart-fastfood"></div></div>
+    </div>
+    <div class="legend" id="perfil-legend" style="margin-top:14px"></div>
   </section>
 
   <section class="panel">
@@ -359,6 +373,7 @@ function render() {
   renderAlerts(alerts);
   renderDist(rows);
   renderMejorar(rows);
+  renderPerfil(rows);
   renderTable(rows);
 }
 
@@ -399,6 +414,26 @@ function renderDist(rows) {
   const color = i => EXP_COLOR[i] || 'var(--muted)';
   $('dist').innerHTML = n ? cats.map((c, i) => counts[i] ? '<span style="width:' + (counts[i] / n * 100) + '%;background:' + color(i) + '" title="' + esc(c) + ': ' + counts[i] + '"></span>' : '').join('') : '';
   $('dist-legend').innerHTML = cats.map((c, i) => '<span><i style="background:' + color(i) + '"></i>' + esc(c) + ' ' + counts[i] + ' (' + pct(counts[i], n) + ')</span>').join('');
+}
+
+function renderPerfil(rows) {
+  const cats = EXP_ORDER.concat([...new Set(rows.map(d => d.exp).filter(v => v && !EXP_ORDER.includes(v)))]);
+  const color = i => EXP_COLOR[i] || 'var(--muted)';
+  const chart = (id, k) => {
+    const groups = new Map();
+    rows.forEach(d => { if (d[k]) groups.set(d[k], (groups.get(d[k]) || []).concat(d)); });
+    const sinDato = rows.filter(d => !d[k]).length;
+    const list = [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0], 'es', { numeric: true }));
+    $(id).innerHTML = (list.length ? list.map(([g, arr]) => {
+      const n = arr.length, good = arr.filter(d => d.expGood).length;
+      return '<div class="bar"><div class="t"><span>' + esc(g) + ' <span class="n">· ' + n + ' (' + pct(n, rows.length) + ')</span></span><span class="n">Satisfacción <b class="' + cls(pctNum(good, n)) + '">' + pct(good, n) + '</b></span></div>' +
+        '<div class="stack">' + cats.map((c, i) => { const m = arr.filter(d => d.exp === c).length; return m ? '<span style="width:' + (m / n * 100) + '%;background:' + color(i) + '" title="' + esc(c) + ': ' + m + '"></span>' : ''; }).join('') + '</div></div>';
+    }).join('') : '<p class="empty">Sin respuestas con este dato.</p>') +
+      (sinDato ? '<p class="hint" style="margin:4px 0 0">' + sinDato + ' respuestas sin este dato.</p>' : '');
+  };
+  chart('chart-edad', 'edad');
+  chart('chart-fastfood', 'fastfood');
+  $('perfil-legend').innerHTML = cats.map((c, i) => '<span><i style="background:' + color(i) + '"></i>' + esc(c) + '</span>').join('');
 }
 
 function renderMejorar(rows) {
