@@ -353,7 +353,7 @@ function render() {
     ['Satisfacción', pctNum(good, n), 'buena o muy buena'],
     ['Entrenamiento bueno', pctNum(count(d => d.entrenOK), n), 'explicaron todo con paciencia (resto: parcial)'],
     ['Buen trato', pctNum(count(d => d.tratoGood), n), 'bueno o muy bueno']
-  ].sort((a, b) => (b[1] ?? -1) - (a[1] ?? -1));
+  ];
   const kpiAlert = [
     ['Sucedió algo', pctNum(count(d => d.incidente), n), 'no les gustó', true],
     ['Pidieron contacto', null, count(d => d.pidioContacto) + ' personas', null]
