@@ -143,11 +143,11 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
   </section>
 
   <section class="panel">
-    <h2>Perfil de ingresantes</h2>
-    <p class="hint">Cantidad de respuestas y cómo calificaron la experiencia general en cada grupo.</p>
+    <h2>Experiencia según edad y experiencia previa</h2>
+    <p class="hint">Qué tan bien o mal les fue en cada grupo.</p>
     <div class="charts">
       <div><h3>Edad</h3><div class="bars" id="chart-edad"></div></div>
-      <div><h3>Experiencia previa en Fast-food</h3><div class="bars" id="chart-fastfood"></div></div>
+      <div><h3>¿Trabajó antes en Fast-food?</h3><div class="bars" id="chart-fastfood"></div></div>
     </div>
     <div class="legend" id="perfil-legend" style="margin-top:14px"></div>
   </section>
@@ -422,14 +422,12 @@ function renderPerfil(rows) {
   const chart = (id, k) => {
     const groups = new Map();
     rows.forEach(d => { if (d[k]) groups.set(d[k], (groups.get(d[k]) || []).concat(d)); });
-    const sinDato = rows.filter(d => !d[k]).length;
     const list = [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0], 'es', { numeric: true }));
-    $(id).innerHTML = (list.length ? list.map(([g, arr]) => {
-      const n = arr.length, good = arr.filter(d => d.expGood).length;
-      return '<div class="bar"><div class="t"><span>' + esc(g) + ' <span class="n">· ' + n + ' (' + pct(n, rows.length) + ')</span></span><span class="n">Satisfacción <b class="' + cls(pctNum(good, n)) + '">' + pct(good, n) + '</b></span></div>' +
-        '<div class="stack">' + cats.map((c, i) => { const m = arr.filter(d => d.exp === c).length; return m ? '<span style="width:' + (m / n * 100) + '%;background:' + color(i) + '" title="' + esc(c) + ': ' + m + '"></span>' : ''; }).join('') + '</div></div>';
-    }).join('') : '<p class="empty">Sin respuestas con este dato.</p>') +
-      (sinDato ? '<p class="hint" style="margin:4px 0 0">' + sinDato + ' respuestas sin este dato.</p>' : '');
+    $(id).innerHTML = list.length ? list.map(([g, arr]) => {
+      const n = arr.length, good = pctNum(arr.filter(d => d.expGood).length, n), bad = pctNum(arr.filter(d => d.expBad).length, n);
+      return '<div class="bar"><div class="t"><span>' + esc(g) + '</span><span><b class="good">' + good + '% buena</b> · <b class="bad">' + bad + '% mala</b></span></div>' +
+        '<div class="stack">' + cats.map((c, i) => { const m = arr.filter(d => d.exp === c).length; return m ? '<span style="width:' + (m / n * 100) + '%;background:' + color(i) + '" title="' + esc(c) + ': ' + m + ' de ' + n + '"></span>' : ''; }).join('') + '</div></div>';
+    }).join('') : '<p class="empty">Sin respuestas con este dato.</p>';
   };
   chart('chart-edad', 'edad');
   chart('chart-fastfood', 'fastfood');
