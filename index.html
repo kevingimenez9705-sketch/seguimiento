@@ -114,7 +114,7 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
     <label>Rol<select id="f-rol"></select></label>
     <label>Antigüedad<select id="f-antig"></select></label>
     <label>Edad<select id="f-edad"></select></label>
-    <label>Exp. Fast-food<select id="f-fastfood"></select></label>
+    <label>Exp. previa<select id="f-fastfood"></select></label>
   </div>
 
   <p class="hero" id="hero">Cargando respuestas…</p>
@@ -141,7 +141,7 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
     <p class="hint">Qué tan bien o mal les fue en cada grupo.</p>
     <div class="charts">
       <div><h3>Edad</h3><div class="bars" id="chart-edad"></div></div>
-      <div><h3>¿Trabajó antes en Fast-food?</h3><div class="bars" id="chart-fastfood"></div></div>
+      <div><h3>¿Tenía experiencia previa?</h3><div class="bars" id="chart-fastfood"></div></div>
     </div>
     <div class="legend" id="perfil-legend" style="margin-top:14px"></div>
   </section>
@@ -162,7 +162,7 @@ th button[aria-sort]{color:var(--ink);font-weight:600}
       <button data-k="rol" aria-pressed="false">Rol</button>
       <button data-k="antig" aria-pressed="false">Antigüedad</button>
       <button data-k="edad" aria-pressed="false">Edad</button>
-      <button data-k="fastfood" aria-pressed="false">Exp. Fast-food</button>
+      <button data-k="fastfood" aria-pressed="false">Exp. previa</button>
     </div>
     <div class="scroll"><table id="tbl"></table></div>
   </section>
@@ -224,7 +224,7 @@ function mapRows(rows) {
     fecha: exact('fecha'), rol: exact('rol'), antig: has('antig'), marca: exact('marca'),
     zona: exact('zona'), local: exact('local'), entren: has('entrenam'), trato: has('trato'),
     paso: has('sucedi'), contacto: has('contacto'), exp: has('experiencia general'), mejorar: has('mejorar'),
-    edad: h.findIndex(x => /(^|[^a-z])edad/.test(x)), fastfood: has('fast')
+    edad: h.findIndex(x => /(^|[^a-z])edad/.test(x)), fastfood: h.findIndex(x => x.includes('fast') || x.includes('previa'))
   };
   const OPCIONALES = ['edad', 'fastfood']; // preguntas nuevas: respuestas viejas quedan vacías
   const faltan = Object.keys(idx).filter(k => idx[k] < 0 && !OPCIONALES.includes(k));
