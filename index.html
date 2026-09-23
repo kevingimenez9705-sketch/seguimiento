@@ -191,8 +191,11 @@ const CONFIG = {
   REFRESH_MIN: 5    // Actualización automática en minutos (0 = desactivada)
 };
 
-const EXP_ORDER = ['Muy buena', 'Buena', 'Regular', 'Mala', 'Muy mala'];
-const EXP_COLOR = ['var(--green)', 'var(--green-2)', 'var(--amber)', 'var(--red-2)', 'var(--red)'];
+const EXP_CATS = [
+  ['Buena / Muy buena', 'var(--green)', d => d.expGood],
+  ['Regular', 'var(--amber)', d => d.exp && !d.expGood && !d.expBad],
+  ['Mala / Muy mala', 'var(--red)', d => d.expBad]
+];
 const SIN_QUEJAS = /^nada/i;
 const VACIO = /^(s\/d|-)?$/i;
 
@@ -408,19 +411,10 @@ function renderAlerts(alerts) {
 
 function renderDist(rows) {
   const n = rows.length;
-  const extra = [...new Set(rows.map(d => d.exp).filter(v => v && !EXP_ORDER.includes(v)))];
-  const cats = EXP_ORDER.concat(extra);
-  const counts = cats.map(c => rows.filter(d => d.exp === c).length);
-  const color = i => EXP_COLOR[i] || 'var(--muted)';
-  $('dist').innerHTML = n ? cats.map((c, i) => counts[i] ? '<span style="width:' + (counts[i] / n * 100) + '%;background:' + color(i) + '" title="' + esc(c) + ': ' + counts[i] + '"></span>' : '').join('') : '';
-  $('dist-legend').innerHTML = cats.map((c, i) => '<span><i style="background:' + color(i) + '"></i>' + esc(c) + ' ' + counts[i] + ' (' + pct(counts[i], n) + ')</span>').join('');
+  const parts = EXP_CATS.map(([l, c, f]) => [l, c, rows.filter(f).length]);
+  $('dist').innerHTML = n ? parts.map(([l, c, m]) => m ? '<span style="width:' + (m / n * 100) + '%;background:' + c + '" title="' + esc(l) + ': ' + m + '"></span>' : '').join('') : '';
+  $('dist-legend').innerHTML = parts.map(([l, c, m]) => '<span><i style="background:' + c + '"></i>' + l + ' ' + m + ' (' + pct(m, n) + ')</span>').join('');
 }
-
-const PERFIL_CATS = [
-  ['Buena / Muy buena', 'var(--green)', d => d.expGood],
-  ['Regular', 'var(--amber)', d => d.exp && !d.expGood && !d.expBad],
-  ['Mala / Muy mala', 'var(--red)', d => d.expBad]
-];
 
 function renderPerfil(rows) {
   const chart = (id, k) => {
@@ -428,14 +422,14 @@ function renderPerfil(rows) {
     rows.forEach(d => { if (d[k] && d.exp) groups.set(d[k], (groups.get(d[k]) || []).concat(d)); });
     const list = [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0], 'es', { numeric: true }));
     $(id).innerHTML = list.length ? list.map(([g, arr]) => {
-      const n = arr.length, parts = PERFIL_CATS.map(([l, c, f]) => [l, c, arr.filter(f).length]);
+      const n = arr.length, parts = EXP_CATS.map(([l, c, f]) => [l, c, arr.filter(f).length]);
       return '<div class="bar"><div class="t"><span>' + esc(g) + '</span><span><b class="good">' + pct(parts[0][2], n) + ' buena</b> · <b class="bad">' + pct(parts[2][2], n) + ' mala</b></span></div>' +
         '<div class="stack">' + parts.map(([l, c, m]) => m ? '<span style="width:' + (m / n * 100) + '%;background:' + c + '" title="' + esc(l) + ': ' + m + ' de ' + n + '"></span>' : '').join('') + '</div></div>';
     }).join('') : '<p class="empty">Sin respuestas con este dato.</p>';
   };
   chart('chart-edad', 'edad');
   chart('chart-fastfood', 'fastfood');
-  $('perfil-legend').innerHTML = PERFIL_CATS.map(([l, c]) => '<span><i style="background:' + c + '"></i>' + l + '</span>').join('');
+  $('perfil-legend').innerHTML = EXP_CATS.map(([l, c]) => '<span><i style="background:' + c + '"></i>' + l + '</span>').join('');
 }
 
 function renderMejorar(rows) {
